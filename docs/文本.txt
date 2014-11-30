@@ -1,0 +1,5 @@
+user: scenbuffalo
+
+pass: upyun2013
+
+buccket: imeiwei

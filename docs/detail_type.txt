@@ -1,0 +1,6 @@
+商户详情的字段
+'f_wifi', value为string，是否支持wifi
+'f_park'，value为string，是否有停车位以及停车优惠
+'f_desc'，value为string，餐厅描述
+'f_time'，value为string，营业时间, 提示商户按照工作日，休息日，中午，晚上等时间填写。变态的海底捞，据说营业到最后一个客人走。
+'f_baof'，value为string，是否有包房

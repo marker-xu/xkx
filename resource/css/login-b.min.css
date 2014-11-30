@@ -1,0 +1,13 @@
+body{background-image:url(img/bg-login-page.jpg);background-position:top center;background-color:#000;}
+#header{display:none;}
+#main-body{width:915px;height:600px;margin:60px auto auto auto;}
+.ads-pic{width:600px;height:600px;float:left;}
+.login-place{width:315px;height:600px;float:right;background-image:url(img/bg-login.jpg);}
+#login-form{display:none;}
+#form-submit{margin:340px 0 auto 0;}
+.btn-submit{width:110px;height:40px;background-image:url(img/btn-login.jpg);float:left;margin-left:35px;}
+.login-qq-btn{display:block;float:left;width:45px;height:40px;}
+#footer{height:50px;font-size:12px;font-family:Helvetica,Arial,sans-serif;line-height:50px;margin-top:12px;color:#D9DFDF;}
+.foot-body{margin:0 auto;width:915px;text-align:center;}
+#footer a{color:#D9DFDF;padding:0 4px;text-decoration:none;}
+#footer a:hover{text-decoration:underline;}
