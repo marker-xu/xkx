@@ -56,10 +56,10 @@ class DBTemplate {
 	public static function getInstance($dbConfigName) {
 	    static $dbTemplateMap = array();
 	    if (!isset($dbTemplateMap[$dbConfigName])) {
-	        $dbTemplateMap[$dbConfigName] = Database::instance($dbConfigName);
+	        $dbTemplateMap[$dbConfigName] = new self($dbConfigName);
 	    }
-	    if ( !($dbTemplateMap[$dbConfigName] instanceof Database) ) {
-	        throw new DataAccessException("the database config ({$dbConfigName}) not exists");
+	    if ( !($dbTemplateMap[$dbConfigName] instanceof DBTemplate) ) {
+	        throw new DataAccessException("the dbTemplate config ({$dbConfigName}) not exists");
 	    }
 	    return $dbTemplateMap[$dbConfigName];
 	}

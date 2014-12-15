@@ -262,29 +262,29 @@ class UserItemDAOImpl extends DatabaseDAO implements UserItemDAO{
      */
     public function build($row){
         $userItem = new UserItem();
-        $userItem->setId($row['user.id']);
-        $userItem->setNick(trim($row['user.nick']));
-        $userItem->setEmail(trim($row['user.email']));
-        $userItem->setIsEmailVerified(trim($row['user.is_email_verified']));
-        $userItem->setIntro(trim($row['user.intro']));
-        $tmp = trim($row['user.avatar']);
+        $userItem->setId($row['id']);
+        $userItem->setNick(trim($row['nick']));
+        $userItem->setEmail(trim($row['email']));
+        $userItem->setIsEmailVerified(trim($row['is_email_verified']));
+        $userItem->setIntro(trim($row['intro']));
+        $tmp = trim($row['avatar']);
         if ($tmp === ''){
             $userItem->setAvatar(array());
         } else {
             $userItem->setAvatar(json_decode($tmp, true));
         }
-        $userItem->setUserLevel(trim($row['user.user_level']));
-        $tmp = trim($row['user.tags']);
+        $userItem->setUserLevel(trim($row['user_level']));
+        $tmp = trim($row['tags']);
         if ($tmp === ''){
             $userItem->setTags(array());
         } else {
             $userItem->setTags(json_decode($tmp, true));
         }
-        $userItem->setAcceptSubscribeEmail(trim($row['user.accept_subscribe_email']));
-        $userItem->setLastLoginTime(trim($row['user.last_login_time']));
-        $userItem->setIdCardNo(trim($row['user.id_card_no']));
-        $userItem->setLastLoginIp(trim($row['user.last_login_ip']));
-        $userItem->setCreateTime(trim($row['user.create_time']));
+        $userItem->setAcceptSubscribeEmail(trim($row['accept_subscribe_email']));
+        $userItem->setLastLoginTime(trim($row['last_login_time']));
+        $userItem->setIdCardNo(trim($row['id_card_no']));
+        $userItem->setLastLoginIp(trim($row['last_login_ip']));
+        $userItem->setCreateTime(trim($row['create_time']));
         return $userItem;
     }
 

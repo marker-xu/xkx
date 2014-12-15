@@ -241,12 +241,12 @@ class UserConnectDAOImpl extends DatabaseDAO implements UserConnectDAO{
      */
     public function build($row){
         $userConnect = new UserConnect();
-        $userConnect->setId($row['user_connect.id']);
-        $userConnect->setUserId(trim($row['user_connect.user_id']));
-        $userConnect->setThirdParty(trim($row['user_connect.third_party']));
-        $userConnect->setConnectId(trim($row['user_connect.connect_id']));
-        $userConnect->setAccessToken(trim($row['user_connect.access_token']));
-        $userConnect->setCreateTime(trim($row['user_connect.create_time']));
+        $userConnect->setId($row['id']);
+        $userConnect->setUserId(trim($row['user_id']));
+        $userConnect->setThirdParty(trim($row['third_party']));
+        $userConnect->setConnectId(trim($row['connect_id']));
+        $userConnect->setAccessToken(trim($row['access_token']));
+        $userConnect->setCreateTime(trim($row['create_time']));
         return $userConnect;
     }
 
