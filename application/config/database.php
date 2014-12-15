@@ -2,7 +2,7 @@
 
 return array
 (
-	'searchcloud' => array(
+	'xkx' => array(
 		'type'       => 'pdo',
 		'connection' => array(
 			/**
@@ -13,9 +13,9 @@ return array
 			 * string   password    database password
 			 * boolean  persistent  use persistent connections?
 			 */
-			'dsn'        => 'mysql:host=localhost;dbname=search_cloud',
-			'username'   => 'search_cloud',
-			'password'   => '111111',
+			'dsn'        => 'mysql:host=127.0.0.1;dbname=test',
+			'username'   => 'test',
+			'password'   => '123456',
 			'persistent' => FALSE,
 		),
 		/**

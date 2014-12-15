@@ -637,4 +637,28 @@ class Util
     {
         return 'http://'.DOMAIN_SITE.'/star/info/'.urlencode($star['name']);
     }
+    /**
+     * load deagle class
+     * @param string $class
+     * @return boolean
+     */
+    public static function loadDeagleClass($class) {
+        static $classMap;
+        if (is_null($classMap)) {
+            $classMap = JKit::config("deagle");
+        }
+        
+        // Transform the class name into a path
+        if (isset($classMap[$class]))
+        {
+            // Load the class file
+            require $classMap[$class];
+        
+            // Class has been found
+            return TRUE;
+        }
+        
+        // Class is not in the filesystem
+        return FALSE;
+    }
 }

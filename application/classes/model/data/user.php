@@ -4,49 +4,40 @@
  * 用户
  * @author xucongbin
  */
-class Model_Data_User extends Model_Data_MongoCollection
-{
-    const MEDAL_SUBSCRIBE_CIRCLE = 1; // 关注圈子 
-    const MEDAL_INVITE_FRIEND = 2; // 邀请好友
-    const MEDAL_CREATE_CIRCLE = 3; //  成功创建圈子
-    
-	public function __construct()
-	{
-        parent::__construct('user');
+class Model_Data_User {
+    /**
+     * 
+     * @var UserItemDAOImpl
+     */
+    private $userItemDao;
+    /**
+     * return void
+     */
+	public function __construct() {
+	    $this->userItemDao = new UserItemDAOImpl(array(), null, DBTemplate::getInstance("xkx"));
 	}
 
 	/**
 	 * 查询单个用户的信息
 	 * @param string $id
-	 * @param array $fields
 	 * @return array|null
 	 */
-	public function get($id, $fields = array())
-	{
-	    return $this->findOne(array('_id' => intval($id)), $fields);
+	public function get($id) {
+	    return $this->userItemDao->getById($id);
 	}
 	
 	/**
 	 * 查询多个用户的信息
 	 * @param array $ids
-	 * @param array $fields
 	 * @param bool $keepOrder 是否保持传入参数中ID的顺序
 	 * @return array
 	 */
-	public function getMulti($ids, $fields = array(), $keepOrder = false) 
-	{
+	public function getMulti($ids, $keepOrder = false) {
 	    if (!$ids) {
 	        return array();
 	    }
-	    $users = $this->find(array('_id' => array('$in' => $ids)), $fields);
+	    $users = $this->userItemDao->getListByIdList($ids);
 	    if ($keepOrder) {
-	        $tmp = array();
-	        foreach ($ids as $id) {
-	            if (isset($users[$id])) {
-	                $tmp[$id] = $users[$id];
-	            }
-	        }
-	        $users = $tmp;
 	    }
 	    return $users;
 	}
@@ -54,51 +45,41 @@ class Model_Data_User extends Model_Data_MongoCollection
 	/**
 	 * 根据昵称查询多个用户的信息
 	 * @param array $arrNick
-	 * @param array $fields
 	 * @param bool $keepOrder 是否保持传入参数中ID的顺序
 	 * @return array
 	 */
-	public function getMultiByNick($arrNick, $fields = array())
-	{
+	public function getMultiByNick($arrNick, $fields = array()) {
 	    if (empty($arrNick)) {
 	        return array();
 	    }
-	    $users = $this->find(array('nick' => array('$in' => $arrNick)), $fields);
+	    $arrNick = array_map(array("StringUtil", "mysqlEscape"), $arrNick);
+	    $condition = array("nick in ('".implode("','", $arrNick)."')");
+	    $users = $this->userItemDao->getList($condition, '', null, 0, 0);
 
 	    return $users;
 	}
 		
 	/**
 	 * 
-	 * Enter description here ...
-	 * @param unknown_type $account
-	 * @param unknown_type $arrParams
-	 * 
-	 * @reutrn int|boolean uid
+	 * @param string $email
+	 * @param array $arrParams
+	 * @return boolean|number
 	 */
 	public function addUser($email, array $arrParams) {
 		JKit::$log->debug(__FUNCTION__." email-{$email}, params-", $arrParams);
-		if(!isset($arrParams['_id'])) {
-			$arrParams['_id'] = $this->getUniqueValue("user");
-		} 
-		$arrParams['email'] = strtolower($email);
+		
 		if( !isset($arrParams['nick']) ) {
-			$arrParams['nick'] = $arrParams['email'];
+			$arrParams['nick'] = $email;
+		}
+		if( !isset($arrParams['create_time']) ) {
+			$arrParams['create_time'] = date("Y-m-d H:i:s");
 		}
 		
-		if( !isset($arrParams['create_time']) ) {
-			$arrParams['create_time'] = new MongoDate();
-		}
-		$arrParams['update_time'] = $arrParams['create_time'];
-		$arrParams['last_login_time'] = $arrParams['create_time'];
 		if( !isset($arrParams['last_login_ip']) ) {
 			$arrParams['last_login_ip'] = Request::$client_ip;
 		}
 		if( !isset($arrParams['is_email_verified']) ) {
-			$arrParams['is_email_verified'] = 0;
-		}
-		if( !isset($arrParams['medal']) ) {
-			$arrParams['medal'] = array();
+			$arrParams['is_email_verified'] = UserItem::EmailVerifiedNo;
 		}
 		if( !isset($arrParams['tags']) ) {
 			$arrParams['tags'] = array();
@@ -106,18 +87,24 @@ class Model_Data_User extends Model_Data_MongoCollection
 		if( !isset($arrParams['accept_subscribe_email']) ) {
 			$arrParams['accept_subscribe_email'] = 1;
 		}
-		
+		$userItem = new UserItem();
+		$userItem->setEmail(strtolower($email));
+		$userItem->setNick($arrParams['nick']);
+		$userItem->setCreateTime($arrParams['create_time']);
+		$userItem->setLastLoginTime($arrParams['create_time']);
+		$userItem->setIsEmailVerified($arrParams['is_email_verified']);
+		$userItem->setTags($arrParams['tags']);
+		$userItem->setAcceptSubscribeEmail($arrParams['accept_subscribe_email']);
 		try {
-			$arrResult = $this->getCollection()->insert($arrParams, true);
-		} catch (MongoCursorException $e) {
-//			echo "addUser failure, code-".$e->getCode().", msg-".$e->getMessage()."<br>\n";
+		    $res = $this->userItemDao->insert($userItem);
+		} catch (Kohana_Database_Exception $e) {
 			JKit::$log->warn("addUser failure, code-".$e->getCode().", msg-".$e->getMessage().", param-", $arrParams);
 			
 			return false;
 		}
-		JKit::$log->debug(__FUNCTION__." result-", $arrResult);
-		if($arrResult["ok"]==1) {
-			return $arrParams['_id'];
+		JKit::$log->debug(__FUNCTION__." result-", $res);
+		if($res) {
+			return $res;
 		}
 		
 		return false;
@@ -127,15 +114,16 @@ class Model_Data_User extends Model_Data_MongoCollection
 	 * Enter description here ...
 	 * @param string $email
 	 * @param int $excludeId
+	 * @return 
 	 */
 	public function getByEmail($email, $excludeId=NULL) {
-		$query = array(
-			'email' => strtolower($email)
-		);
-		if ($excludeId!==NULL) {
-			$query['_id'] = array('$ne'=>intval($excludeId));
-		}
-		return $this->findOne($query);
+	    $condition = array("email= '". StringUtil::mysqlEscape($email)."'");
+	    if ($excludeId) {
+	        $condition[] = array("id!=".intval($excludeId));
+	    }
+	    $users = $this->userItemDao->getList($condition, '', null, 0, 1);
+
+	    return $users[0];
 	}
 	/**
 	 * 
@@ -144,38 +132,36 @@ class Model_Data_User extends Model_Data_MongoCollection
 	 * @param int $excludeId
 	 */
 	public function getByNick($nick, $excludeId=NULL) {
-		$query = array(
-			'nick' => $nick
-		);
-		if ($excludeId!==NULL) {
-			$query['_id'] = array('$ne'=>intval($excludeId));
-		}
-		return $this->findOne($query);
+	    $condition = array("nick= '". StringUtil::mysqlEscape($nick)."'");
+	    if ($excludeId) {
+	        $condition[] = array("id!=".intval($excludeId));
+	    }
+	    $users = $this->userItemDao->getList($condition, '', null, 0, 1);
+	    
+	    return $users[0];
 	}
 	/**
-	 * 
 	 * 更新用户信息
 	 * @param int $uid
-	 * @param array $arrParams
+	 * @param UserItem $userItem
 	 * @throws Model_Data_Exception
+	 * @return boolean
 	 */
-	public function modifyById($uid, array $arrParams) {
-		JKit::$log->debug(__FUNCTION__." uid-{$uid}, params-", $arrParams);
+	public function modifyById($uid, $userItem) {
+	    
+		JKit::$log->debug(__FUNCTION__." uid-{$uid}, params-", (array)$userItem);
 		if ( !$this->get($uid) ) {
 			throw new Model_Data_Exception("user({$uid}) not exists", -3001, NULL);
 		}
-		if(!isset($arrParams['update_time'])) {
-			$arrParams['update_time'] = new MongoDate();	
-		}
-		
+		$userItem->setId($id);
 		$query = array("_id" => intval($uid) );
 		try {
-			$arrResult = $this->getCollection()->update($query, array('$set'=>$arrParams), array("safe"=>true));
-		} catch (MongoCursorException $e) {
-			JKit::$log->warn("modifyUser failure, code-".$e->getCode().", msg-".$e->getMessage().", uid-{$uid}, param-", $arrParams);
+			$res = $this->userItemDao->update($userItem);
+		} catch (Kohana_Database_Exception $e) {
+			JKit::$log->warn("modifyUser failure, code-".$e->getCode().", msg-".$e->getMessage().", uid-{$uid}, param-", (array)$userItem);
 		}
-		JKit::$log->debug(__FUNCTION__." result-", $arrResult);
-		return isset($arrResult["ok"]) && $arrResult["ok"]==1 ? true : false;
+		JKit::$log->debug(__FUNCTION__." result-", $res);
+		return $res;
 	}
 	
 	
@@ -211,54 +197,4 @@ class Model_Data_User extends Model_Data_MongoCollection
 		JKit::$log->debug(__FUNCTION__." errno-".$fdfs->get_last_error_no().", msg-".$fdfs->get_last_error_info().", ret-".$ret);
 		return $ret;
 	}
-    
-	/**
-	 * 颁发勋章
-	 * @param int $userId
-	 * @param string|array $medal 可以一次颁发多个，勋章定义见Model_Data_User里的勋章常量
-	 * @return bool
-	 */
-    public function awardMedal($userId, $medal)
-    {
-        return $this->addToSet(array('_id' => $userId), 'medal', $medal);
-    }
-    
-	/**
-	 * 取消勋章
-	 * @param int $userId
-	 * @param string|array $medal 可以一次取消多个
-	 * @return bool
-	 */
-    public function unawardMedal($userId, $medal)
-    {
-        return $this->removeFromSet(array('_id' => $userId), 'medal', $medal);
-    }
-    
-	/**
-	 * 用户是否拥有某个勋章
-	 * @param int $userId
-	 * @param string $medal
-	 * @return bool
-	 */
-    public function isAwardedMedal($userId, $medal)
-    {
-        return $this->count(array('_id' => $userId, 'medal' => $medal)) > 0;
-    }
-    
-	/**
-	 * 用户拥有的所有勋章
-	 * @param int $userId
-	 * @return array
-	 */
-    public function medals($userId)
-    {
-        $docs = $this->find(array('_id' => $userId), array('medal'));
-        if ($docs) {
-            $doc = current($docs);
-            return isset($doc['medal']) ? $doc['medal'] : array();
-        } else {
-            return array();
-        }
-    }
-    
 }

@@ -8,6 +8,10 @@ class Controller_User extends Controller
 {
     //用户TAG最大数量
     const USER_TAG_MAX_LIMIT = 20;
+    /**
+     * 
+     * @var Model_Logic_User
+     */
 	private $objLogicUser;
 	
 	public function before() {
