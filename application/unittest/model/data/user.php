@@ -20,7 +20,7 @@ class ModelDataUserTest extends PHPUnit_Framework_TestCase {
     }
     
     public function test_getId() {
-//     	return;
+    	return;
     	$id = "1";
     	$tmp  = $this->_model->get( $id );
     	print_r( $tmp );
@@ -36,4 +36,26 @@ class ModelDataUserTest extends PHPUnit_Framework_TestCase {
     	$res = $tmp instanceof UserItem;
     	$this->assertTrue($res);
     }
+    
+    public function test_addUser() {
+//         return;
+        $email = "";
+        $arrParams = array(
+                "nick" => "sea-saga",
+                "is_email_verified" => UserItem::EmailVerifiedYes
+        );
+        $nick = "baowei";
+        $res  = $this->_model->addUser($email, $arrParams);
+        $this->assertTrue((boolean)$res);
+    }
+    
+    public function test_modifyById() {
+        return;
+        $nick = "baowei";
+        $tmp  = $this->_model->getByNick($nick);
+        print_r( $tmp );
+        $res = $tmp instanceof UserItem;
+        $this->assertTrue($res);
+    }
+    
 }

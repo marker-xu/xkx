@@ -45,10 +45,9 @@ class Model_Data_User {
 	/**
 	 * 根据昵称查询多个用户的信息
 	 * @param array $arrNick
-	 * @param bool $keepOrder 是否保持传入参数中ID的顺序
 	 * @return array
 	 */
-	public function getMultiByNick($arrNick, $fields = array()) {
+	public function getMultiByNick($arrNick) {
 	    if (empty($arrNick)) {
 	        return array();
 	    }
@@ -148,13 +147,11 @@ class Model_Data_User {
 	 * @return boolean
 	 */
 	public function modifyById($uid, $userItem) {
-	    
 		JKit::$log->debug(__FUNCTION__." uid-{$uid}, params-", (array)$userItem);
 		if ( !$this->get($uid) ) {
 			throw new Model_Data_Exception("user({$uid}) not exists", -3001, NULL);
 		}
 		$userItem->setId($id);
-		$query = array("_id" => intval($uid) );
 		try {
 			$res = $this->userItemDao->update($userItem);
 		} catch (Kohana_Database_Exception $e) {
